@@ -264,7 +264,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-primary/40 blur-lg rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="w-10 h-10 bg-transparent rounded-xl flex items-center justify-center relative z-10">
                 <Image
-                  src="/bear-logo.png"
+                  src="/bear-icon.png"
                   alt="Logo"
                   width={40}
                   height={40}
