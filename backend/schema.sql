@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS emails (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  address TEXT NOT NULL,
+  sender TEXT,
+  subject TEXT,
+  body_text TEXT,
+  body_html TEXT,
+  received_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_emails_address ON emails(address);
+
+CREATE TABLE IF NOT EXISTS aliases (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  address TEXT NOT NULL UNIQUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

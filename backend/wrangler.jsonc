@@ -1,0 +1,23 @@
+{
+  "name": "temp-email-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-29",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "temp-email-db",
+      "database_id": "418f37ff-3ff6-4791-8cb8-75684e529131"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": [
+      "0 0 * * *"
+    ]
+  }
+}
