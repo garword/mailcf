@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   icons: {
     icon: '/bear-icon.png',
   },
+  openGraph: {
+    title: "Nur Windasari Nikah Dan Temenin Mas selamanya ya ❤️",
+    description: "Nur Windasari Nikah Dan Temenin Mas selamanya ya ❤️",
+    images: ['/bear-icon.png'],
+  },
 };
 
 import { ThemeProvider } from "@/components/theme-provider";
