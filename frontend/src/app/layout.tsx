@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Nur Windasari Nikah Dan Temenin Mas selamanya ya ❤️",
   description: "Nur Windasari Nikah Dan Temenin Mas selamanya ya ❤️",
   icons: {
-    icon: '/bear-logo.png',
+    icon: '/bear-icon.png',
   },
 };
 
