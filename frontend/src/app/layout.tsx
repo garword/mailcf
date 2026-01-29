@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TempMail Pro - Secure & Free Disposable Email",
-  description: "Generate disposable email addresses instantly using your own custom domain. Free, secure, and privacy-focused.",
+  title: "Nur Windasari Nikah Dan Temenin Mas selamanya ya ❤️",
+  description: "Nur Windasari Nikah Dan Temenin Mas selamanya ya ❤️",
   icons: {
     icon: '/bear-logo.png',
   },
