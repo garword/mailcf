@@ -215,6 +215,23 @@ export default function Home() {
     fetcher
   );
 
+  const handleDeleteMessage = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+
+    // Quick optimistic UI update could be done here, but safe bet is toast promise
+    const promise = fetch(`${API_BASE}/api/message/${id}`, { method: 'DELETE' });
+
+    toast.promise(promise, {
+      loading: 'Deleting message...',
+      success: () => {
+        mutate();
+        if (selectedMsgId === id) setSelectedMsgId(null);
+        return 'Message deleted';
+      },
+      error: 'Failed to delete'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row antialiased h-auto md:h-screen overflow-auto md:overflow-hidden relative">
 
@@ -255,7 +272,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Sidebar / Main Control */}
-      <div className="w-full md:w-[400px] border-r border-border bg-card/50 flex flex-col items-center p-6 backdrop-blur-xl relative z-10 transition-colors">
+      <div className="w-full md:w-[450px] border-r border-border bg-card/50 flex flex-col items-center p-6 backdrop-blur-xl relative z-10 transition-colors">
 
         {/* Brand */}
         <div className="w-full mb-10 flex items-center justify-between">
@@ -543,8 +560,19 @@ export default function Home() {
                           {new Date(msg.received_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <div className="text-sm text-muted-foreground font-medium mb-1 line-clamp-1">{msg.subject}</div>
-                      <div className="text-xs text-muted-foreground/70 line-clamp-2">{msg.body_text}</div>
+                      <div className="flex justify-between items-end">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm text-muted-foreground font-medium mb-1 line-clamp-1">{msg.subject}</div>
+                          <div className="text-xs text-muted-foreground/70 line-clamp-2">{msg.body_text}</div>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteMessage(e, msg.id)}
+                          className="md:opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg ml-2"
+                          title="Delete Message"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </motion.div>
                   ))
                 )}

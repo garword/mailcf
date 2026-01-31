@@ -140,6 +140,17 @@ app.get('/api/message/:id', async (c) => {
 	return c.json(email);
 });
 
+// API: Delete a message
+app.delete('/api/message/:id', async (c) => {
+	const id = c.req.param('id');
+	try {
+		await c.env.DB.prepare('DELETE FROM emails WHERE id = ?').bind(id).run();
+		return c.json({ success: true });
+	} catch (e) {
+		return c.json({ error: 'Failed to delete message' }, 500);
+	}
+});
+
 export default {
 	// HTTP Handler (Hono)
 	fetch: app.fetch,
