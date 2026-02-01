@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import { Copy, RefreshCw, Mail, ArrowLeft, Loader2, Sparkles, Inbox, ChevronDown, Book, Trash2, Pencil, Globe, Volume2, VolumeX } from "lucide-react";
+import { Copy, RefreshCw, Mail, ArrowLeft, Loader2, Sparkles, Inbox, ChevronDown, Book, Trash2, Pencil, Globe, Volume2, VolumeX, QrCode, Download, Bell, BellRing } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -10,9 +10,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import QRCode from "react-qr-code";
+
+
 
 // Replace with your actual Worker URL if different
 const API_BASE = "https://temp-email-worker.manulsinul99.workers.dev";
+
+// ... (Rest of the file content until we hit the component body)
+// I need to be careful with replace_file_content on a large file.
+// It is better to use multi_replace for targeted insertions.
+// Let's cancel this ReplaceFileContent and use MultiReplace instead.
+// I'll start with imports.
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -31,6 +40,8 @@ export default function Home() {
   const [selectedMsgId, setSelectedMsgId] = useState<number | null>(null);
   const [customName, setCustomName] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("");
+  const [showQR, setShowQR] = useState(false);
+
 
   const [audioPermission, setAudioPermission] = useState<'pending' | 'allowed' | 'denied'>('pending');
 
@@ -163,6 +174,30 @@ export default function Home() {
     prevInboxLength.current = currentLength;
   }, [inbox.length, t, audioPermission]);
 
+  // Request Notification Permission on user interaction or explicit button
+  const requestNotificationPermission = async () => {
+    if (!("Notification" in window)) return;
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      toast.success("Notifikasi diaktifkan! 🔔");
+    }
+  };
+
+  // Browser Notification Effect
+  useEffect(() => {
+    const currentLength = inbox.length;
+    if (isFirstLoad.current) return;
+
+    if (currentLength > prevInboxLength.current && "Notification" in window && Notification.permission === "granted") {
+      // Check if document is hidden to avoid spamming if user is already looking
+      if (document.hidden) {
+        new Notification(t.inbox.newMsg, {
+          body: `You have ${currentLength} messages in your temporary inbox.`,
+          icon: '/bear-icon.png' // ensure this exists or use a valid path
+        });
+      }
+    }
+  }, [inbox.length, t]);
 
   const generateEmail = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -232,8 +267,52 @@ export default function Home() {
     });
   };
 
+  const downloadEML = (message: EmailMessage & { body_html?: string }) => {
+    const emlContent = `From: ${message.sender}
+To: ${email}
+Subject: ${message.subject}
+Date: ${new Date(message.received_at).toUTCString()}
+Content-Type: text/html; charset=utf-8
+
+${message.body_html || message.body_text}`;
+
+    const blob = new Blob([emlContent], { type: 'message/rfc822' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${message.subject.replace(/[^a-z0-9]/gi, '_').substring(0, 50)}.eml`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row antialiased h-auto md:h-screen overflow-auto md:overflow-hidden relative">
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {showQR && (
+          <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowQR(false)}>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center flex flex-col items-center gap-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-bold text-black">Scan QR Code</h3>
+              <div className="p-2 bg-white rounded-lg border-2 border-dashed border-gray-200">
+                {email && <QRCode value={email} size={200} />}
+              </div>
+              <p className="text-sm text-gray-500 font-mono break-all">{email}</p>
+              <button onClick={() => setShowQR(false)} className="text-sm text-gray-500 hover:text-black underline">
+                Close
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Audio Permission Modal */}
       <AnimatePresence>
@@ -313,6 +392,13 @@ export default function Home() {
               </select>
               <Globe className="w-3 h-3 absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
+            <button
+              onClick={requestNotificationPermission}
+              className="p-1.5 hover:bg-secondary rounded-md text-muted-foreground hover:text-primary transition-colors"
+              title="Enable Browser Notifications"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
             <ThemeToggle />
           </div>
         </div>
@@ -374,6 +460,16 @@ export default function Home() {
                     <Trash2 className="w-4 h-4" />
                   </button>
                   <div className="w-px h-4 bg-border mx-1" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowQR(true);
+                    }}
+                    className="p-2 hover:bg-background rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                    title="Show QR Code"
+                  >
+                    <QrCode className="w-4 h-4" />
+                  </button>
                   <Copy className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
               </div>
@@ -606,6 +702,16 @@ export default function Home() {
                       {messageData ? messageData.subject : "Loading..."}
                     </h1>
                   </div>
+                  {messageData && (
+                    <button
+                      onClick={() => downloadEML(messageData)}
+                      className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-medium transition-colors"
+                      title="Download .eml"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Sync/Download</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Body */}
@@ -623,12 +729,19 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="prose prose-zinc dark:prose-invert max-w-none">
+
+                      <div className="prose prose-zinc dark:prose-invert max-w-none prose-a:text-blue-600 hover:prose-a:text-blue-500 prose-a:underline prose-a:break-all">
                         {/* We prefer HTML but fallback to text */}
                         {messageData.body_html ? (
                           <div dangerouslySetInnerHTML={{ __html: messageData.body_html }} />
                         ) : (
-                          <pre className="whitespace-pre-wrap font-sans text-foreground">{messageData.body_text}</pre>
+                          <pre className="whitespace-pre-wrap font-sans text-foreground">
+                            {messageData.body_text.split(/(https?:\/\/[^\s]+)/g).map((part: string, i: number) =>
+                              /(https?:\/\/[^\s]+)/g.test(part) ? (
+                                <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-500 underline break-all">{part}</a>
+                              ) : part
+                            )}
+                          </pre>
                         )}
                       </div>
                     </div>
