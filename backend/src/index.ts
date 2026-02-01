@@ -76,13 +76,37 @@ app.get('/api/stats', async (c) => {
 app.post('/api/generate', async (c) => {
 	let { prefix, domain } = await c.req.json<{ prefix?: string, domain?: string }>().catch(() => ({ prefix: undefined, domain: undefined }));
 
-	// If no prefix provided, generate a random one (6 chars)
+
+	// Indonesian Name Lists
+	const firstNames = [
+		"Budi", "Siti", "Agus", "Rizky", "Dewi", "Bayu", "Fajar", "Intan", "Eka", "Putri",
+		"Andi", "Rina", "Arif", "Sari", "Doni", "Mega", "Reza", "Nina", "Dwi", "Maya",
+		"Joko", "Wulan", "Tono", "Ratna", "Indra", "Yuli", "Adi", "Lia", "Bambang", "Nur",
+		"Dimas", "Ayu", "Fikri", "Nisa", "Kevin", "Tiara", "Yoga", "Rani", "Rian", "Siska"
+	];
+	const lastNames = [
+		"Pratama", "Santoso", "Wijaya", "Saputra", "Hidayat", "Kusuma", "Wulandari", "Lestari",
+		"Siregar", "Nasution", "Utama", "Nugroho", "Setiawan", "Kurniawan", "Ramadhan",
+		"Fauzi", "Susanto", "Mulyadi", "Cahyono", "Gunawan", "Rahmawati", "Hartono", "Wibowo",
+		"Saputri", "Firmansyah", "Yuliana", "Permana", "Anggraeni", "Mustofa", "Irawan"
+	];
+
+	// If no prefix provided, generate a humanized Indonesian name
 	if (!prefix) {
-		prefix = Math.random().toString(36).substring(2, 8);
+		const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+		const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+		const randomNumber = Math.floor(Math.random() * 900) + 100; // 100-999
+
+		// 70% chance to have firstname.lastname, 30% to have firstname+number only
+		if (Math.random() > 0.3) {
+			prefix = `${randomFirst}.${randomLast}${randomNumber}`;
+		} else {
+			prefix = `${randomFirst}${randomNumber}`;
+		}
 	}
 
-	// Basic sanitization
-	prefix = prefix.replace(/[^a-zA-Z0-9._-]/g, '');
+	// Basic sanitization (lowercase, remove disallowed chars)
+	prefix = prefix.toLowerCase().replace(/[^a-z0-9._-]/g, '');
 
 	// Default to the provided domain or request the first available one (logic could be improved)
 	// For now, we trust the frontend sent a valid domain or we fallback to 'example.com' safely
