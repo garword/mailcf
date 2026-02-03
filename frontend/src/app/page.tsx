@@ -351,7 +351,7 @@ ${message.body_html || message.body_text}`;
       </AnimatePresence>
 
       {/* Sidebar / Main Control */}
-      <div className="w-full md:w-[450px] border-r border-border bg-card/50 flex flex-col items-center p-6 backdrop-blur-xl relative z-10 transition-colors">
+      <div className="w-full md:w-[320px] lg:w-[380px] xl:w-[450px] border-r border-border bg-card/50 flex flex-col items-center p-6 backdrop-blur-xl relative z-10 transition-colors shrink-0">
 
         {/* Brand */}
         <div className="w-full mb-10 flex items-center justify-between">
@@ -604,7 +604,7 @@ ${message.body_html || message.body_text}`;
         <div className="flex-1 flex overflow-hidden">
           {/* List */}
           <div className={cn(
-            "w-full md:w-[350px] border-r border-border flex flex-col transition-all duration-300 absolute md:relative inset-0 z-20 bg-background md:bg-transparent h-full",
+            "w-full md:w-[280px] lg:w-[350px] border-r border-border flex flex-col transition-all duration-300 absolute md:relative inset-0 z-20 bg-background md:bg-transparent h-full",
             selectedMsgId ? "-translate-x-full md:translate-x-0 hidden md:flex" : "translate-x-0 flex"
           )}>
             <div className="p-4 border-b border-border flex items-center justify-between">
